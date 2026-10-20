@@ -1,63 +1,38 @@
-<div style="text-align:center;margin-top:30px;font-family:sans-serif;max-width:700px;margin-left:auto;margin-right:auto">
-  <h2>🍹 NightZone - Trùm cuối (Pay 5 UIDs)</h2>
-  <p id="status">Chưa đăng nhập Pi</p>
+<div style="max-width:380px;margin:20px auto;font-family:sans-serif;text-align:center">
+  <h3 style="margin:0">NightZone - Trùm cuối (Pay 5 UIDs)</h3>
+  <p id="status" style="color:#00c851;font-weight:bold">Chưa chạy</p>
 
-  <!-- NÚT 1: CẤP QUYỀN VÍ - QUAN TRỌNG NHẤT -->
-  <button id="authBtn" onclick="capQuyenVi()" style="padding:15px 30px;font-size:16px;font-weight:bold;background:#00c851;color:white;border:none;border-radius:8px;cursor:pointer;width:100%;margin-bottom:15px">
-    🔑 1. Cấp quyền ví cho NightZone (Bấm trên TỪNG ĐT)
-  </button>
+  <button onclick="capQuyenVi()" style="width:100%;padding:12px;background:#00c851;color:white;border:none;border-radius:8px;margin-bottom:10px;font-weight:bold">🔑 1. Cấp quyền ví (bấm trên TỪNG ĐT)</button>
+  <button onclick="pay()" style="width:100%;padding:12px;background:#7b2cbf;color:white;border:none;border-radius:8px;font-weight:bold">🚀 2. Chạy Pay 5 UIDs ngay</button>
 
-  <!-- NÚT 2: CHẠY PAY -->
-  <button id="payBtn" onclick="triggerPay5Uid()" style="padding:15px 30px;font-size:16px;font-weight:bold;background:#7b2cbf;color:white;border:none;border-radius:8px;cursor:pointer;width:100%">
-    🚀 2. Chạy Pay 5 UIDs ngay
-  </button>
-
-  <pre id="resultLog" style="margin-top:20px;text-align:left;background:#1e1e1e;color:#00ffcc;padding:15px;border-radius:6px;overflow-x:auto;display:none"></pre>
+  <div id="log" style="margin-top:15px;background:#000;color:#00ff88;font-family:monospace;font-size:12px;text-align:left;padding:10px;border-radius:8px;min-height:100px;white-space:pre-wrap">Chờ...</div>
 </div>
 
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <script>
-  const logBox = document.getElementById('resultLog');
-  const statusEl = document.getElementById('status');
+Pi.init({version:"2.0"});
+async function capQuyenVi(){
+  try{
+    const auth = await Pi.authenticate(['username','payments','wallet_address'], p=>{});
+    document.getElementById('status').innerText = "✅ Đã cấp: " + auth.user.username;
+    document.getElementById('log').innerText = "✅ Cấp quyền OK\nUID: " + auth.user.uid;
+  }catch(e){ alert(e.message); }
+}
+async function pay(){
+  const log = document.getElementById('log');
+  log.innerText = "Đang bắn 5 UIDs...\n";
+  const res = await fetch('/api/pay5uid',{method:'POST'});
+  const data = await res.json();
   
-  Pi.init({ version: "2.0", sandbox: false });
-
-  // Bước bắt buộc phải làm trên 5 ĐT
-  async function capQuyenVi(){
-    logBox.style.display = "block";
-    logBox.innerText = "Đang xin quyền wallet_address...";
-    try {
-      const scopes = ['username','payments','wallet_address'];
-      const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-      statusEl.innerText = "✅ Đã cấp quyền: " + auth.user.username + " | " + auth.user.uid;
-      logBox.innerText = "✅ CẤP QUYỀN THÀNH CÔNG:\n" + JSON.stringify(auth, null, 2);
-    } catch(e){
-      logBox.innerText = "❌ Chưa Allow hoặc lỗi: " + e.message;
-    }
-  }
-
-  function onIncompletePaymentFound(payment){
-    console.log("Incomplete found:", payment);
-    // Tự cancel nếu kẹt
-    Pi.cancelPayment(payment.identifier);
-  }
-
-  async function triggerPay5Uid(){
-    const btn = document.getElementById('payBtn');
-    btn.innerText = "Đang xử lý...";
-    btn.disabled = true;
-    logBox.style.display = "block";
-    logBox.innerText = "Đang gửi yêu cầu tới /api/pay5uid...";
-    try {
-      const res = await fetch('/api/pay5uid', { method: 'POST' });
-      const data = await res.json();
-      logBox.innerText = JSON.stringify(data, null, 2);
-      if(data.results && data.results[0].success) statusEl.innerText = "🎉 Pay thành công!";
-    } catch(e){
-      logBox.innerText = "Lỗi kết nối: " + e.message;
-    } finally {
-      btn.innerText = "🚀 2. Chạy Pay 5 UIDs ngay";
-      btn.disabled = false;
-    }
-  }
+  // CHỈ HIỆN GỌN NHƯ LUMIA909
+  let txt = `success: ${data.success}\ntotal: ${data.total}\n\n`;
+  data.results.forEach(r=>{
+    const short = r.uid.slice(0,6);
+    txt += r.success ? `✅ ${short}... OK\n` : `❌ ${short}... ${r.error}\n`;
+  });
+  txt += `\n${data.success ? "🎉 5/5 THÀNH CÔNG - TRÙM CUỐI!" : "Thử lại"}`;
+  
+  log.innerText = txt;
+  document.getElementById('status').innerText = data.success ? "🎉 Pay thành công! 5/5 OK" : "Fail";
+}
 </script>
