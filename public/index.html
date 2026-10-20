@@ -1,35 +1,62 @@
-<div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
-  <h2>🍹 Nightzone - Test Pay 5 UIDs</h2>
-  <p>Nhấn nút bên dưới để kích hoạt thanh toán hàng loạt qua Backend API.</p>
-  
-  <button id="payBtn" onclick="triggerPay5Uid()" style="padding: 15px 30px; font-size: 16px; font-weight: bold; background-color: #7b2cbf; color: white; border: none; border-radius: 8px; cursor: pointer;">
-    🚀 Chạy Pay 5 UIDs ngay
+<div style="text-align:center;margin-top:30px;font-family:sans-serif;max-width:700px;margin-left:auto;margin-right:auto">
+  <h2>🍹 NightZone - Trùm cuối (Pay 5 UIDs)</h2>
+  <p id="status">Chưa đăng nhập Pi</p>
+
+  <!-- NÚT 1: CẤP QUYỀN VÍ - QUAN TRỌNG NHẤT -->
+  <button id="authBtn" onclick="capQuyenVi()" style="padding:15px 30px;font-size:16px;font-weight:bold;background:#00c851;color:white;border:none;border-radius:8px;cursor:pointer;width:100%;margin-bottom:15px">
+    🔑 1. Cấp quyền ví cho NightZone (Bấm trên TỪNG ĐT)
   </button>
 
-  <pre id="resultLog" style="margin-top: 20px; text-align: left; background: #1e1e1e; color: #00ffcc; padding: 15px; border-radius: 6px; max-width: 600px; margin-left: auto; margin-right: auto; overflow-x: auto; display: none;"></pre>
+  <!-- NÚT 2: CHẠY PAY -->
+  <button id="payBtn" onclick="triggerPay5Uid()" style="padding:15px 30px;font-size:16px;font-weight:bold;background:#7b2cbf;color:white;border:none;border-radius:8px;cursor:pointer;width:100%">
+    🚀 2. Chạy Pay 5 UIDs ngay
+  </button>
+
+  <pre id="resultLog" style="margin-top:20px;text-align:left;background:#1e1e1e;color:#00ffcc;padding:15px;border-radius:6px;overflow-x:auto;display:none"></pre>
 </div>
 
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <script>
-  async function triggerPay5Uid() {
+  const logBox = document.getElementById('resultLog');
+  const statusEl = document.getElementById('status');
+  
+  Pi.init({ version: "2.0", sandbox: false });
+
+  // Bước bắt buộc phải làm trên 5 ĐT
+  async function capQuyenVi(){
+    logBox.style.display = "block";
+    logBox.innerText = "Đang xin quyền wallet_address...";
+    try {
+      const scopes = ['username','payments','wallet_address'];
+      const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+      statusEl.innerText = "✅ Đã cấp quyền: " + auth.user.username + " | " + auth.user.uid;
+      logBox.innerText = "✅ CẤP QUYỀN THÀNH CÔNG:\n" + JSON.stringify(auth, null, 2);
+    } catch(e){
+      logBox.innerText = "❌ Chưa Allow hoặc lỗi: " + e.message;
+    }
+  }
+
+  function onIncompletePaymentFound(payment){
+    console.log("Incomplete found:", payment);
+    // Tự cancel nếu kẹt
+    Pi.cancelPayment(payment.identifier);
+  }
+
+  async function triggerPay5Uid(){
     const btn = document.getElementById('payBtn');
-    const logBox = document.getElementById('resultLog');
-    
-    btn.innerText = "Đang xử lý giao dịch...";
+    btn.innerText = "Đang xử lý...";
     btn.disabled = true;
     logBox.style.display = "block";
-    logBox.innerText = "Đang gửi yêu cầu tới server API...";
-
+    logBox.innerText = "Đang gửi yêu cầu tới /api/pay5uid...";
     try {
-      const response = await fetch('/api/pay5uid', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const data = await response.json();
+      const res = await fetch('/api/pay5uid', { method: 'POST' });
+      const data = await res.json();
       logBox.innerText = JSON.stringify(data, null, 2);
-    } catch (error) {
-      logBox.innerText = "Lỗi kết nối: " + error.message;
+      if(data.results && data.results[0].success) statusEl.innerText = "🎉 Pay thành công!";
+    } catch(e){
+      logBox.innerText = "Lỗi kết nối: " + e.message;
     } finally {
-      btn.innerText = "🚀 Chạy Pay 5 UIDs ngay";
+      btn.innerText = "🚀 2. Chạy Pay 5 UIDs ngay";
       btn.disabled = false;
     }
   }
