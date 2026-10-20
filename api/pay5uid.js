@@ -1,36 +1,134 @@
-<div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
-  <h2>🍹 Nightzone - Test Pay 5 UIDs</h2>
-  <p>Nhấn nút bên dưới để kích hoạt thanh toán hàng loạt qua Backend API.</p>
-  
-  <button id="payBtn" onclick="triggerPay5Uid()" style="padding: 15px 30px; font-size: 16px; font-weight: bold; background-color: #7b2cbf; color: white; border: none; border-radius: 8px; cursor: pointer;">
-    🚀 Chạy Pay 5 UIDs ngay
-  </button>
-
-  <pre id="resultLog" style="margin-top: 20px; text-align: left; background: #1e1e1e; color: #00ffcc; padding: 15px; border-radius: 6px; max-width: 600px; margin-left: auto; margin-right: auto; overflow-x: auto; display: none;"></pre>
-</div>
-
-<script>
-  async function triggerPay5Uid() {
-    const btn = document.getElementById('payBtn');
-    const logBox = document.getElementById('resultLog');
-    
-    btn.innerText = "Đang xử lý giao dịch...";
-    btn.disabled = true;
-    logBox.style.display = "block";
-    logBox.innerText = "Đang gửi yêu cầu tới server API...";
-
-    try {
-      const response = await fetch('/api/pay5uid', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const data = await response.json();
-      logBox.innerText = JSON.stringify(data, null, 2);
-    } catch (error) {
-      logBox.innerText = "Lỗi kết nối: " + error.message;
-    } finally {
-      btn.innerText = "🚀 Chạy Pay 5 UIDs ngay";
-      btn.disabled = false;
-    }
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ success: false, error: "Method Not Allowed" });
   }
-</script>
+
+  const PI_API_KEY = process.env.PI_API_KEY;
+  if (!PI_API_KEY) {
+    return res.status(500).json({ success: false, error: "Missing PI_API_KEY" });
+  }
+
+  const body = req.body || {};
+  let targetList = [];
+  if (Array.isArray(body.uids) && body.uids.length > 0) {
+    targetList = body.uids.map(u => typeof u === 'string' ? u.trim() : '').filter(Boolean);
+  } else if (typeof body.uid === 'string' && body.uid.trim()) {
+    targetList = [body.uid.trim()];
+  }
+
+  // 5 UID chính thức của Nightzone
+  const DEFAULT_5UIDS = [
+    "b38efa68-4778-4f60-b62e-f76793d64668",
+    "b4acb64e-92a4-4807-9e21-eb089cb5f89a",
+    "6b1f43f1-3220-4a92-b1cd-aac769edeca6",
+    "5f1fe442-51e8-4542-87a5-5991d41992f6",
+    "af95ea0c-147a-4c95-8454-f35a285785bf"
+  ];
+  
+  if (targetList.length === 0) targetList = DEFAULT_5UIDS;
+  const amount = Number(body.amount) || 1;
+
+  async function piFetch(path, method = "GET", payload) {
+    const r = await fetch(`https://api.minepi.com${path}`, {
+      method,
+      headers: {
+        Authorization: `Key ${PI_API_KEY}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: payload ? JSON.stringify(payload) : undefined,
+    });
+    const text = await r.text();
+    let data;
+    try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text.slice(0,3000)}; }
+    return { ok: r.ok, status: r.status, data };
+  }
+
+  async function cancelOngoingIfFound(piErrorData) {
+    try {
+      let paymentId = null;
+      if (piErrorData && piErrorData.payment && piErrorData.payment.identifier) paymentId = piErrorData.payment.identifier;
+      if (!paymentId && piErrorData && piErrorData.identifier) paymentId = piErrorData.identifier;
+      if (!paymentId && piErrorData && piErrorData.ongoing_payment && piErrorData.ongoing_payment.identifier) paymentId = piErrorData.ongoing_payment.identifier;
+      
+      if (!paymentId) {
+        const inc = await piFetch("/v2/payments/incomplete", "GET");
+        const list = inc.data?.incomplete_payments || inc.data || [];
+        if (Array.isArray(list) && list.length > 0) {
+          paymentId = list[0].identifier;
+        }
+      }
+
+      if (paymentId) {
+        let result = await piFetch(`/v2/payments/${paymentId}/complete`, "POST", { txid: "nightzone_retry_complete" });
+        if (!result.ok) {
+          result = await piFetch(`/v2/payments/${paymentId}/cancel`, "POST");
+        }
+        return { cancelled: result.ok, paymentId, result: result.data };
+      }
+    } catch (e) {}
+    return { cancelled: false };
+  }
+
+  const results = [];
+
+  for (let i = 0; i < targetList.length; i++) {
+    const uid = targetList[i];
+    let attempt = 0;
+    let finalResult = null;
+
+    while (attempt < 3) {
+      attempt++;
+      const piPayload = {
+        payment: {
+          amount,
+          memo: `Nightzone Reward to @${uid.substring(0,6)} - ${i+1}/${targetList.length}`,
+          metadata: { target_uid: uid, batch_index: i, attempt },
+          uid,
+        },
+      };
+
+      const piResponse = await piFetch("/v2/payments", "POST", piPayload);
+
+      if (piResponse.ok) {
+        finalResult = { uid, success: true, pi_response: piResponse.data, attempts: attempt };
+        break;
+      } else {
+        const errStr = JSON.stringify(piResponse.data).toLowerCase();
+        if (errStr.includes("ongoing_payment_found") || errStr.includes("ongoing payment")) {
+          const cancelRes = await cancelOngoingIfFound(piResponse.data);
+          if (cancelRes.cancelled) {
+            finalResult = { uid, success: false, retrying: true, cancelled_old: cancelRes.paymentId };
+            continue;
+          } else {
+            finalResult = { uid, success: false, error: "ongoing_payment_found but cannot cancel", details: piResponse.data, status: piResponse.status };
+            break;
+          }
+        } else {
+          finalResult = { uid, success: false, error: "Pi API rejected", details: piResponse.data, status: piResponse.status, attempts: attempt };
+          break;
+        }
+      }
+    }
+
+    if (finalResult && finalResult.retrying) {
+      const lastPayload = {
+        payment: { amount, memo: `Nightzone Retry ${uid}`, metadata: { target_uid: uid }, uid }
+      };
+      const lastResp = await piFetch("/v2/payments", "POST", lastPayload);
+      finalResult = lastResp.ok ? { uid, success: true, pi_response: lastResp.data } : { uid, success: false, error: "Failed after cancel", details: lastResp.data };
+    }
+
+    results.push(finalResult);
+    if (i < targetList.length - 1) await new Promise(r => setTimeout(r, 800));
+  }
+
+  const allOk = results.every(r => r.success);
+  return res.status(allOk ? 200 : 207).json({
+    success: allOk,
+    total: results.length,
+    results,
+    note: "Nightzone A2U Batch Payment with auto cancel/retry ongoing payment"
+  });
+}
