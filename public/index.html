@@ -1,38 +1,76 @@
-<div style="max-width:380px;margin:20px auto;font-family:sans-serif;text-align:center">
-  <h3 style="margin:0">NightZone - Trùm cuối (Pay 5 UIDs)</h3>
-  <p id="status" style="color:#00c851;font-weight:bold">Chưa chạy</p>
+<div style="text-align: center; margin: 30px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; padding: 15px;">
+  <h2 style="color: #fff; margin-bottom: 8px;">🍹 Nightzone - Test Pay 5 UIDs</h2>
+  <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">Kích hoạt thanh toán thưởng hàng loạt qua Backend API</p>
+  
+  <button id="payBtn" onclick="triggerPay5Uid()" style="width: 100%; padding: 14px; font-size: 16px; font-weight: bold; background: linear-gradient(135deg, #7b2cbf, #9d4edd); color: white; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4); transition: all 0.3s ease;">
+    🚀 Chạy Pay 5 UIDs ngay
+  </button>
 
-  <button onclick="capQuyenVi()" style="width:100%;padding:12px;background:#00c851;color:white;border:none;border-radius:8px;margin-bottom:10px;font-weight:bold">🔑 1. Cấp quyền ví (bấm trên TỪNG ĐT)</button>
-  <button onclick="pay()" style="width:100%;padding:12px;background:#7b2cbf;color:white;border:none;border-radius:8px;font-weight:bold">🚀 2. Chạy Pay 5 UIDs ngay</button>
-
-  <div id="log" style="margin-top:15px;background:#000;color:#00ff88;font-family:monospace;font-size:12px;text-align:left;padding:10px;border-radius:8px;min-height:100px;white-space:pre-wrap">Chờ...</div>
+  <!-- Khu vực hiển thị kết quả trực quan -->
+  <div id="resultStatus" style="margin-top: 20px;"></div>
 </div>
 
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <script>
-Pi.init({version:"2.0"});
-async function capQuyenVi(){
-  try{
-    const auth = await Pi.authenticate(['username','payments','wallet_address'], p=>{});
-    document.getElementById('status').innerText = "✅ Đã cấp: " + auth.user.username;
-    document.getElementById('log').innerText = "✅ Cấp quyền OK\nUID: " + auth.user.uid;
-  }catch(e){ alert(e.message); }
-}
-async function pay(){
-  const log = document.getElementById('log');
-  log.innerText = "Đang bắn 5 UIDs...\n";
-  const res = await fetch('/api/pay5uid',{method:'POST'});
-  const data = await res.json();
-  
-  // CHỈ HIỆN GỌN NHƯ LUMIA909
-  let txt = `success: ${data.success}\ntotal: ${data.total}\n\n`;
-  data.results.forEach(r=>{
-    const short = r.uid.slice(0,6);
-    txt += r.success ? `✅ ${short}... OK\n` : `❌ ${short}... ${r.error}\n`;
-  });
-  txt += `\n${data.success ? "🎉 5/5 THÀNH CÔNG - TRÙM CUỐI!" : "Thử lại"}`;
-  
-  log.innerText = txt;
-  document.getElementById('status').innerText = data.success ? "🎉 Pay thành công! 5/5 OK" : "Fail";
-}
+  async function triggerPay5Uid() {
+    const btn = document.getElementById('payBtn');
+    const statusBox = document.getElementById('resultStatus');
+    
+    btn.innerText = "⏳ Đang xử lý giao dịch...";
+    btn.disabled = true;
+    statusBox.innerHTML = `
+      <div style="padding: 15px; background: #2a2a3a; color: #e0e0e0; border-radius: 10px; font-size: 14px;">
+        🔄 Đang kết nối Serverless Function & gọi Pi Network...
+      </div>`;
+
+    try {
+      const response = await fetch('/api/pay5uid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const textData = await response.text();
+      let data;
+      try { data = JSON.parse(textData); } catch (e) {}
+
+      if (!data || !data.results) {
+        statusBox.innerHTML = `<div style="padding: 15px; background: #3d0000; color: #ff6b6b; border-radius: 10px;">❌ Lỗi Server: ${textData.slice(0, 150)}</div>`;
+        return;
+      }
+
+      // Tạo giao diện danh sách kết quả đẹp mắt
+      let cardsHtml = `<div style="margin-top: 10px; text-align: left;">`;
+      cardsHtml += `<div style="color: #00ffcc; font-weight: bold; margin-bottom: 10px; text-align: center;">✅ Kết quả gửi thưởng (${data.total} Pioneer):</div>`;
+
+      data.results.forEach((item, index) => {
+        const isSuccess = item.success;
+        const uidShort = item.uid ? item.uid.substring(0, 8) + '...' : 'Unknown';
+        const amount = item.pi_response?.amount || 1;
+        const memo = item.pi_response?.memo || 'Nightzone Reward';
+
+        cardsHtml += `
+          <div style="background: ${isSuccess ? '#1b2e2b' : '#3d1b1b'}; border-left: 5px solid ${isSuccess ? '#00e676' : '#ff5252'}; padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #fff;">
+              <span>👤 #${index + 1} UID: ${uidShort}</span>
+              <span style="background: ${isSuccess ? '#00e676' : '#ff5252'}; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                ${isSuccess ? 'THÀNH CÔNG' : 'THẤT BẠI'}
+              </span>
+            </div>
+            <div style="font-size: 13px; color: #bbb; margin-top: 5px;">
+              <div>💰 Số lượng: <b>${amount} Pi</b></div>
+              <div>📝 Memo: <i>${memo}</i></div>
+            </div>
+          </div>
+        `;
+      });
+
+      cardsHtml += `</div>`;
+      statusBox.innerHTML = cardsHtml;
+
+    } catch (error) {
+      statusBox.innerHTML = `<div style="padding: 15px; background: #3d0000; color: #ff6b6b; border-radius: 10px;">❌ Lỗi kết nối mạng: ${error.message}</div>`;
+    } finally {
+      btn.innerText = "🚀 Chạy Pay 5 UIDs ngay";
+      btn.disabled = false;
+    }
+  }
 </script>
