@@ -1,90 +1,36 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NightZone - Collect UIDs</title>
-    <!-- Nhúng Pi Network SDK -->
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #0f172a; color: #fff; text-align: center; }
-        .card { background: #1e293b; padding: 20px; border-radius: 12px; max-width: 400px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        button { background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 15px; }
-        button:hover { background: #7c3aed; }
-        ul { text-align: left; background: #0f172a; padding: 15px 30px; border-radius: 8px; font-family: monospace; }
-        li { margin-bottom: 5px; word-break: break-all; color: #38bdf8; }
-        .status { margin-top: 15px; font-weight: bold; color: #4ade80; }
-    </style>
-</head>
-<body>
+<div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+  <h2>🍹 Nightzone - Test Pay 5 UIDs</h2>
+  <p>Nhấn nút bên dưới để kích hoạt thanh toán hàng loạt qua Backend API.</p>
+  
+  <button id="payBtn" onclick="triggerPay5Uid()" style="padding: 15px 30px; font-size: 16px; font-weight: bold; background-color: #7b2cbf; color: white; border: none; border-radius: 8px; cursor: pointer;">
+    🚀 Chạy Pay 5 UIDs ngay
+  </button>
 
-    <div class="card">
-        <h1>🍹 NightZone</h1>
-        <p>Đăng nhập để tham gia danh sách Batching 5 UID</p>
-        
-        <button id="btnLogin" onclick="loginPi()">🔑 Đăng nhập với Pi</button>
+  <pre id="resultLog" style="margin-top: 20px; text-align: left; background: #1e1e1e; color: #00ffcc; padding: 15px; border-radius: 6px; max-width: 600px; margin-left: auto; margin-right: auto; overflow-x: auto; display: none;"></pre>
+</div>
 
-        <div class="status" id="status">Chưa đăng nhập</div>
+<script>
+  async function triggerPay5Uid() {
+    const btn = document.getElementById('payBtn');
+    const logBox = document.getElementById('resultLog');
+    
+    btn.innerText = "Đang xử lý giao dịch...";
+    btn.disabled = true;
+    logBox.style.display = "block";
+    logBox.innerText = "Đang gửi yêu cầu tới server API...";
 
-        <h3>Danh sách UID đã thu thập (<span id="count">0</span>/5):</h3>
-        <ul id="uidList">
-            <li style="color: #94a3b8;">Chưa có UID nào...</li>
-        </ul>
-    </div>
-
-    <script>
-        // Khởi tạo Pi SDK Sandbox mode
-        Pi.init({ version: "2.0", sandbox: true });
-
-        // Mảng lưu tạm 5 UID trên giao diện
-        let collectedUids = [];
-
-        function onIncompletePaymentFound(payment) {
-            console.log("Tìm thấy giao dịch chưa hoàn tất:", payment);
-        }
-
-        async function loginPi() {
-            try {
-                document.getElementById('status').innerText = "Đang kết nối Pi SDK...";
-                const scopes = ['username', 'payments'];
-                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                
-                const uid = auth.user.uid;
-                const username = auth.user.username;
-
-                document.getElementById('status').innerText = `Xin chào: ${username}`;
-
-                // Thêm UID vào danh sách (nếu chưa tồn tại)
-                if (!collectedUids.includes(uid)) {
-                    collectedUids.push(uid);
-                    updateUidUI();
-                } else {
-                    alert("UID này đã có trong danh sách!");
-                }
-
-            } catch (err) {
-                console.error("Lỗi auth:", err);
-                document.getElementById('status').innerText = "Lỗi đăng nhập Pi!";
-            }
-        }
-
-        function updateUidUI() {
-            const listEl = document.getElementById('uidList');
-            const countEl = document.getElementById('count');
-            
-            countEl.innerText = collectedUids.length;
-            listEl.innerHTML = '';
-
-            collectedUids.forEach((uid, index) => {
-                const li = document.createElement('li');
-                li.innerText = `${index + 1}. ${uid}`;
-                listEl.appendChild(li);
-            });
-
-            if (collectedUids.length >= 5) {
-                document.getElementById('status').innerText = "🎉 Đã thu thập đủ 5 UID thực tế!";
-            }
-        }
-    </script>
-</body>
-</html>
+    try {
+      const response = await fetch('/api/pay5uid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+      logBox.innerText = JSON.stringify(data, null, 2);
+    } catch (error) {
+      logBox.innerText = "Lỗi kết nối: " + error.message;
+    } finally {
+      btn.innerText = "🚀 Chạy Pay 5 UIDs ngay";
+      btn.disabled = false;
+    }
+  }
+</script>
