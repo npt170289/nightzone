@@ -72,7 +72,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .nz-section { padding: 40px 0 8px; }
 .nz-sec-title {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 900;
   line-height: 1.3;
   margin-bottom: 18px;
 }
@@ -81,6 +81,29 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
    no-JS still shows the titles. */
 .nz-sec-title.reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.7s ease, transform 0.7s ease; }
 .nz-sec-title.reveal.in { opacity: 1; transform: translateY(0); }
+/* Colorful 3D sparkling display titles (Nguyễn, 2026-11-22: font sặc sỡ 3D lấp lánh).
+   Display titles ONLY — hero NIGHTZONE + 4 section titles. Body text stays
+   Be Vietnam Pro regular for readability. Vivid gradient (gold → pink →
+   purple → cyan) + 3D extrusion (layered drop-shadow) + slow shimmer sweep.
+   NOTE: this block must stay BEFORE the .nz-hero h1 rule below — same
+   specificity, so the h1 rule's own animation (shimmer + glow) wins. */
+.nz-hero h1,
+.nz-sec-title {
+  font-weight: 900;
+  background: linear-gradient(90deg, #ffd166 0%, #ff5e8a 25%, #a855f7 50%, #22d3ee 75%, #ffd166 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(10, 4, 24, 0.9)) drop-shadow(0 4px 0 rgba(10, 4, 24, 0.6)) drop-shadow(0 10px 20px rgba(168, 85, 247, 0.45));
+  animation: nz-shimmer 7s linear infinite;
+}
+/* Slow shimmer sweep across the gradient (no strobe, no flashing). */
+@keyframes nz-shimmer {
+  from { background-position: 0% center; }
+  to { background-position: 200% center; }
+}
 /* ---------- Hero ---------- */
 .nz-hero { text-align: center; padding: 56px 0 24px; }
 .nz-hero-eyebrow {
@@ -94,13 +117,21 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   font-size: 44px;
   line-height: 1.05;
   letter-spacing: 0.14em;
-  font-weight: 800;
-  animation: nz-glow 4s ease-in-out infinite;
+  /* Display treatment (shared rule below) + glow pulse on top of shimmer. */
+  animation: nz-shimmer 7s linear infinite, nz-glow 4s ease-in-out infinite;
 }
-/* Gentle glow pulse + letter-spacing breathing (slow 4s cycle, no strobe). */
+/* Gentle glow pulse + letter-spacing breathing (slow 4s cycle, no strobe).
+   Animates the drop-shadow filter — text-shadow would bleed through the
+   transparent gradient fill. */
 @keyframes nz-glow {
-  0%, 100% { text-shadow: 0 0 16px rgba(212, 175, 55, 0.22); letter-spacing: 0.14em; }
-  50% { text-shadow: 0 0 34px rgba(212, 175, 55, 0.5); letter-spacing: 0.18em; }
+  0%, 100% {
+    filter: drop-shadow(0 2px 0 rgba(10, 4, 24, 0.9)) drop-shadow(0 4px 0 rgba(10, 4, 24, 0.6)) drop-shadow(0 0 14px rgba(212, 175, 55, 0.35)) drop-shadow(0 10px 20px rgba(168, 85, 247, 0.35));
+    letter-spacing: 0.14em;
+  }
+  50% {
+    filter: drop-shadow(0 2px 0 rgba(10, 4, 24, 0.9)) drop-shadow(0 4px 0 rgba(10, 4, 24, 0.6)) drop-shadow(0 0 32px rgba(255, 94, 138, 0.55)) drop-shadow(0 10px 26px rgba(168, 85, 247, 0.6));
+    letter-spacing: 0.18em;
+  }
 }
 .nz-hero-tagline {
   margin-top: 14px;
@@ -390,7 +421,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .nz-hero h1, .nz-hero-intro { animation: none; }
+  .nz-hero h1, .nz-hero-intro, .nz-sec-title { animation: none; }
   .nz-sec-title.reveal { opacity: 1; transform: none; transition: none; }
   .nz-col-item { transition: none; }
 }

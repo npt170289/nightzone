@@ -16,19 +16,27 @@
   };
 
   /* Scattered moments collage — media from the 3 members' own libraries.
-     Label (HTML overlay chip) always matches the app the media belongs to. */
+     Label (HTML overlay chip) always matches the app the media belongs to.
+     Order: Garden/Lumia items interleaved (incl. 6 real food photos from
+     Pexels, 3 per venue), Lovely Animals grouped together at the END. */
   var COLLAGE = [
     { src: "images/garden-dancers.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "tall", alt: "Dancer tại 303 Garden Station" },
-    { src: "images/lovely-corgi.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Corgi vui vẻ — Lovely Animals" },
+    { src: "images/food-garden-bbq.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Xiên nướng BBQ trên than hoa — 303 Garden Station" },
     { src: "images/lumia-sign.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "sq", alt: "Biển hiệu Lumia 909" },
     { src: "images/garden-party.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "tall", alt: "Tiệc nhóm đông tại 303 Garden Station" },
+    { src: "images/food-lumia-bbq.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "tall", alt: "Xiên gà nướng BBQ — Lumia 909" },
     { src: "videos/notte-1.mp4", kind: "video", app: "lumia909", label: "Lumia 909", shape: "tall", alt: "Clip NOTTE — Lumia 909" },
-    { src: "images/lovely-panda.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Gấu trúc ôm tre — Lovely Animals" },
     { src: "images/lumia-lounge.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "wide", alt: "Không gian Lounge — Lumia 909" },
+    { src: "images/food-garden-hotpot.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "tall", alt: "Lẩu hải sản — 303 Garden Station" },
     { src: "videos/garden-dance.mp4", kind: "video", app: "garden303", label: "303 Garden Station", shape: "tall", alt: "Clip dancer — 303 Garden Station" },
-    { src: "images/lovely-cat.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Mèo cam trong vườn hoa — Lovely Animals" },
+    { src: "images/food-lumia-fried.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "wide", alt: "Cánh gà chiên giòn — Lumia 909" },
     { src: "images/lumia-customers.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "tall", alt: "Khách tại Lumia 909" },
-    { src: "images/garden-stage.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Dancer trên sân khấu — 303 Garden Station" }
+    { src: "images/food-garden-seafood.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Tôm nướng than hoa — 303 Garden Station" },
+    { src: "images/garden-stage.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Dancer trên sân khấu — 303 Garden Station" },
+    { src: "images/food-lumia-seafood.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "tall", alt: "Tôm nướng trình bày — Lumia 909" },
+    { src: "images/lovely-corgi.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Corgi vui vẻ — Lovely Animals" },
+    { src: "images/lovely-panda.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Gấu trúc ôm tre — Lovely Animals" },
+    { src: "images/lovely-cat.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Mèo cam trong vườn hoa — Lovely Animals" }
   ];
 
   function collageHtml(item) {
