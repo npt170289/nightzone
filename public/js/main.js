@@ -19,15 +19,15 @@
      Label (HTML overlay chip) always matches the app the media belongs to. */
   var COLLAGE = [
     { src: "images/garden-dancers.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "tall", alt: "Dancer tại 303 Garden Station" },
-    { src: "images/lovely-corgi.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "wide", alt: "Corgi vui vẻ — Lovely Animals" },
+    { src: "images/lovely-corgi.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Corgi vui vẻ — Lovely Animals" },
     { src: "images/lumia-sign.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "sq", alt: "Biển hiệu Lumia 909" },
-    { src: "images/garden-party.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Tiệc nhóm đông tại 303 Garden Station" },
+    { src: "images/garden-party.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "tall", alt: "Tiệc nhóm đông tại 303 Garden Station" },
     { src: "videos/notte-1.mp4", kind: "video", app: "lumia909", label: "Lumia 909", shape: "tall", alt: "Clip NOTTE — Lumia 909" },
-    { src: "images/lovely-panda.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "wide", alt: "Gấu trúc ôm tre — Lovely Animals" },
+    { src: "images/lovely-panda.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Gấu trúc ôm tre — Lovely Animals" },
     { src: "images/lumia-lounge.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "wide", alt: "Không gian Lounge — Lumia 909" },
-    { src: "videos/garden-dance.mp4", kind: "video", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Clip dancer — 303 Garden Station" },
-    { src: "images/lovely-cat.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "wide", alt: "Mèo cam trong vườn hoa — Lovely Animals" },
-    { src: "images/lumia-customers.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "wide", alt: "Khách tại Lumia 909" },
+    { src: "videos/garden-dance.mp4", kind: "video", app: "garden303", label: "303 Garden Station", shape: "tall", alt: "Clip dancer — 303 Garden Station" },
+    { src: "images/lovely-cat.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "tall", alt: "Mèo cam trong vườn hoa — Lovely Animals" },
+    { src: "images/lumia-customers.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "tall", alt: "Khách tại Lumia 909" },
     { src: "images/garden-stage.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Dancer trên sân khấu — 303 Garden Station" }
   ];
 
@@ -81,8 +81,15 @@
       ? '<a class="nz-card-maps" href="' + esc(m.maps_url) + '" target="_blank" rel="noopener noreferrer">Chỉ đường ↗</a>'
       : "";
 
+    var media = m.image
+      ? '<a class="nz-card-media" href="' + esc(m.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(m.name) + '">' +
+        '<img src="' + esc(m.image) + '" alt="' + esc(m.image_alt || m.name) + '" loading="lazy"></a>'
+      : "";
+
     return (
       '<article class="nz-card" data-member="' + esc(m.id) + '">' +
+        media +
+        '<div class="nz-card-body">' +
         '<div class="nz-card-cat">' + esc(m.category) + '</div>' +
         '<h3>' + esc(m.name) + '</h3>' +
         '<div class="nz-card-tagline">' + esc(m.tagline) + '</div>' +
@@ -92,6 +99,7 @@
         '<div class="nz-card-actions">' +
           '<a class="nz-card-visit" href="' + esc(m.url) + '" target="_blank" rel="noopener noreferrer">Truy cập website ↗</a>' +
           mapsLink +
+        '</div>' +
         '</div>' +
       '</article>'
     );
