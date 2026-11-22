@@ -247,7 +247,7 @@
   var aiPanel = null;
 
   function greetingText() {
-    return "Dạ chào bạn! Mình là lễ tân NightZone — cổng chào 2 quán: 303 Garden Station (Gò Vấp) và Lumia 909 (Chợ Quán).\nMình giới thiệu quán, so sánh 2 quán và đưa bạn sang website của quán. Mình không nhận đặt bàn ở đây ạ.\nHi! I'm NightZone reception — gateway to 303 Garden Station (Gò Vấp) and Lumia 909 (Chợ Quán).\n您好！我是 NightZone 前台——通往 303 Garden Station（Gò Vấp）和 Lumia 909（Chợ Quán）的门户。";
+    return "Dạ chào bạn! Mình là lễ tân 2 quán: 303 Garden Station (Gò Vấp) và Lumia 909 (Chợ Quán).\nMình đưa bạn sang website của quán nhé.\nHi! I'm the receptionist for 2 venues: 303 Garden Station (Gò Vấp) and Lumia 909 (Chợ Quán).\nLet me take you to their websites.\n您好！我是两家店的前台：303 Garden Station（Gò Vấp）和 Lumia 909（Chợ Quán）。\n我来带您进入它们的网站。";
   }
 
   function addMsg(text, who) {
@@ -335,8 +335,6 @@
             '<button type="button" class="nz-chat-ai-back" id="nz-chat-ai-back">← Quay lại tab Nội bộ</button>' +
           '</div>' +
           '<div class="nz-chat-chips" id="nz-chat-chips">' +
-            '<button type="button" data-q="NightZone là gì?">NightZone là gì?</button>' +
-            '<button type="button" data-q="So sánh 2 quán">So sánh 2 quán</button>' +
             '<button type="button" data-q="Tìm Beer Garden">Tìm Beer Garden</button>' +
             '<button type="button" data-q="Địa chỉ và giờ mở cửa">Địa chỉ &amp; giờ mở cửa</button>' +
           '</div>' +
