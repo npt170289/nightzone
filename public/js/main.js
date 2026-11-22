@@ -12,7 +12,7 @@
   var MEMBER_URLS = {
     garden303: "https://gardenstation303-mainnet.vercel.app",
     lumia909: "https://lumia909.vercel.app",
-    lovelyanimals: "https://tnkh160389githubio.vercel.app"
+    lovelyanimals: "https://tnkh160389.github.io"
   };
 
   /* Scattered moments collage — media from the 3 members' own libraries.
@@ -180,7 +180,7 @@
         '<p style="color:rgba(255,255,255,.65);font-size:14px;">Không tải được danh sách thành viên. Truy cập trực tiếp: ' +
         '<a href="https://gardenstation303-mainnet.vercel.app" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">Garden 303</a> · ' +
         '<a href="https://lumia909.vercel.app" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">Lumia 909</a> · ' +
-        '<a href="https://tnkh160389githubio.vercel.app" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">Lovely Animals</a></p>';
+        '<a href="https://tnkh160389.github.io" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">Lovely Animals</a></p>';
     }
   }
 
