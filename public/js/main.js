@@ -165,8 +165,27 @@
     }
   }
 
+  /* Section titles reveal on scroll. Hidden state is applied by JS only
+     (class .reveal), so no-JS / no-IntersectionObserver still shows them. */
+  function revealTitles() {
+    var titles = document.querySelectorAll(".nz-sec-title");
+    if (!titles.length) return;
+    if (!("IntersectionObserver" in window)) return; // titles stay visible
+    titles.forEach(function (t) { t.classList.add("reveal"); });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add("in");
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    titles.forEach(function (t) { io.observe(t); });
+  }
+
   function init() {
     renderCollage();
+    revealTitles();
     fetch(DATA_URL)
       .then(function (r) {
         if (!r.ok) throw new Error("HTTP " + r.status);

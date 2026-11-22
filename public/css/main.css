@@ -19,6 +19,11 @@
 html { scroll-behavior: smooth; }
 body {
   background-color: var(--bg);
+  background-image: linear-gradient(rgba(5, 8, 15, 0.80), rgba(5, 8, 15, 0.80)), url("../images/bg-nightzone.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
@@ -72,6 +77,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   line-height: 1.3;
   margin-bottom: 4px;
 }
+/* Section titles reveal on scroll (JS adds .reveal then .in via
+   IntersectionObserver). Hidden state is applied by JS only, so
+   no-JS still shows the titles. */
+.nz-sec-title.reveal { opacity: 0; transform: translateY(12px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.nz-sec-title.reveal.in { opacity: 1; transform: translateY(0); }
 .nz-sec-sub {
   font-size: 10px;
   letter-spacing: 0.14em;
@@ -95,6 +105,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   line-height: 1.05;
   letter-spacing: 0.14em;
   font-weight: 700;
+  animation: nz-glow 4s ease-in-out infinite;
+}
+/* Gentle glow pulse + letter-spacing breathing (slow 4s cycle, no strobe). */
+@keyframes nz-glow {
+  0%, 100% { text-shadow: 0 0 16px rgba(212, 175, 55, 0.22); letter-spacing: 0.14em; }
+  50% { text-shadow: 0 0 34px rgba(212, 175, 55, 0.5); letter-spacing: 0.18em; }
 }
 .nz-hero-tagline {
   margin-top: 14px;
@@ -113,6 +129,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   max-width: 560px;
   font-size: 14px;
   color: var(--muted);
+  animation: nz-rise 0.9s ease-out both;
+}
+/* Welcome text fades in and slides up on load (once, moderate speed). */
+@keyframes nz-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .nz-hero-cta { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .nz-btn {
@@ -135,8 +157,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   gap: 16px;
 }
 .nz-card {
-  background: var(--card);
-  border: 1px solid var(--card-border);
+  background: rgba(15, 23, 42, 0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid transparent;
   border-radius: var(--radius);
   padding: 20px;
   display: flex;
@@ -144,12 +168,20 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   position: relative;
   overflow: hidden;
 }
-.nz-card::before {
+/* Always-visible gradient border (Lumia ::after + mask technique).
+   Gold -> purple -> teal: neutral NightZone accent, kept consistent site-wide. */
+.nz-card::after {
   content: "";
   position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--gold);
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 2px;
+  background: linear-gradient(135deg, #d4af37, #a855f7, #14b8a6);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
 }
 .nz-card-cat {
   font-size: 11px;
@@ -197,7 +229,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 
 /* ---------- Member intro ---------- */
 .nz-intro-block {
-  background: var(--bg-soft);
+  background: rgba(11, 18, 32, 0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   padding: 18px 20px;
@@ -214,7 +248,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: var(--card);
+  background: rgba(15, 23, 42, 0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   padding: 16px 18px;
@@ -244,9 +280,23 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   display: block;
   overflow: hidden;
   border-radius: 14px;
-  border: 1px solid var(--card-border);
+  border: 1px solid transparent;
   background: var(--card);
   transition: transform 0.25s ease;
+}
+/* Subtle always-visible gradient frame, same palette as the member cards. */
+.nz-col-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.9), rgba(168, 85, 247, 0.9), rgba(20, 184, 166, 0.9));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
 }
 .nz-col-item img, .nz-col-item video {
   width: 100%;
@@ -259,7 +309,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 .nz-col-item:nth-child(3n+1) { transform: rotate(-1.2deg); }
 .nz-col-item:nth-child(3n+2) { transform: rotate(1deg); }
 .nz-col-item:nth-child(3n) { transform: rotate(-0.6deg); }
-.nz-col-item:hover, .nz-col-item:focus-visible { transform: rotate(0deg) scale(1.02); z-index: 2; border-color: var(--gold); }
+.nz-col-item:hover, .nz-col-item:focus-visible { transform: rotate(0deg) scale(1.02); z-index: 2; }
 .nz-col-label {
   position: absolute;
   left: 8px;
@@ -314,4 +364,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   .nz-collage { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px; gap: 12px; }
   .nz-map-list { grid-template-columns: repeat(2, 1fr); }
   .nz-sec-title { font-size: 22px; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .nz-hero h1, .nz-hero-intro { animation: none; }
+  .nz-sec-title.reveal { opacity: 1; transform: none; transition: none; }
+  .nz-col-item { transition: none; }
 }
