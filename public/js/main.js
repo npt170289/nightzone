@@ -9,6 +9,49 @@
 
   var DATA_URL = "data/members.json";
 
+  var MEMBER_URLS = {
+    garden303: "https://gardenstation303-mainnet.vercel.app",
+    lumia909: "https://lumia909.vercel.app",
+    lovelyanimals: "https://tnkh160389githubio.vercel.app"
+  };
+
+  /* Scattered moments collage — media from the 3 members' own libraries.
+     Label (HTML overlay chip) always matches the app the media belongs to. */
+  var COLLAGE = [
+    { src: "images/garden-dancers.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "tall", alt: "Dancer tại 303 Garden Station" },
+    { src: "images/lovely-corgi.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "wide", alt: "Corgi vui vẻ — Lovely Animals" },
+    { src: "images/lumia-sign.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "sq", alt: "Biển hiệu Lumia 909" },
+    { src: "images/garden-party.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Tiệc nhóm đông tại 303 Garden Station" },
+    { src: "videos/notte-1.mp4", kind: "video", app: "lumia909", label: "Lumia 909", shape: "tall", alt: "Clip NOTTE — Lumia 909" },
+    { src: "images/lovely-panda.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "wide", alt: "Gấu trúc ôm tre — Lovely Animals" },
+    { src: "images/lumia-lounge.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "wide", alt: "Không gian Lounge — Lumia 909" },
+    { src: "videos/garden-dance.mp4", kind: "video", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Clip dancer — 303 Garden Station" },
+    { src: "images/lovely-cat.jpg", kind: "img", app: "lovelyanimals", label: "Lovely Animals", shape: "wide", alt: "Mèo cam trong vườn hoa — Lovely Animals" },
+    { src: "images/lumia-customers.jpg", kind: "img", app: "lumia909", label: "Lumia 909", shape: "wide", alt: "Khách tại Lumia 909" },
+    { src: "images/garden-stage.jpg", kind: "img", app: "garden303", label: "303 Garden Station", shape: "wide", alt: "Dancer trên sân khấu — 303 Garden Station" }
+  ];
+
+  function collageHtml(item) {
+    var media = item.kind === "video"
+      ? '<video src="' + esc(item.src) + '" autoplay muted loop playsinline disablepictureinpicture aria-label="' + esc(item.alt) + '"></video>'
+      : '<img src="' + esc(item.src) + '" alt="' + esc(item.alt) + '" loading="lazy">';
+    return (
+      '<a class="nz-col-item col-' + esc(item.shape) + '" href="' + esc(MEMBER_URLS[item.app]) + '" target="_blank" rel="noopener noreferrer" data-app="' + esc(item.app) + '">' +
+        media +
+        '<span class="nz-col-label">' + esc(item.label) + '</span>' +
+      '</a>'
+    );
+  }
+
+  function renderCollage() {
+    var wrap = document.getElementById("nz-collage");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    COLLAGE.forEach(function (item) {
+      wrap.appendChild(el(collageHtml(item)));
+    });
+  }
+
   function esc(s) {
     return String(s == null ? "" : s)
       .replace(/&/g, "&amp;")
@@ -123,6 +166,7 @@
   }
 
   function init() {
+    renderCollage();
     fetch(DATA_URL)
       .then(function (r) {
         if (!r.ok) throw new Error("HTTP " + r.status);

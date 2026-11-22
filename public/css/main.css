@@ -231,6 +231,60 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
 }
 .nz-map-note { font-size: 13px; color: var(--muted-2); margin-top: 12px; }
 
+/* ---------- Moments collage (scattered, playful) ---------- */
+.nz-collage {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 120px;
+  grid-auto-flow: dense;
+  gap: 10px;
+}
+.nz-col-item {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  transition: transform 0.25s ease;
+}
+.nz-col-item img, .nz-col-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.nz-col-item.col-tall { grid-row: span 2; }
+.nz-col-item.col-wide { grid-column: span 2; }
+.nz-col-item:nth-child(3n+1) { transform: rotate(-1.2deg); }
+.nz-col-item:nth-child(3n+2) { transform: rotate(1deg); }
+.nz-col-item:nth-child(3n) { transform: rotate(-0.6deg); }
+.nz-col-item:hover, .nz-col-item:focus-visible { transform: rotate(0deg) scale(1.02); z-index: 2; border-color: var(--gold); }
+.nz-col-label {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(5, 8, 15, 0.85);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nz-col-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+.nz-collage-note { font-size: 13px; color: var(--muted-2); margin-top: 14px; text-align: center; }
+
 /* ---------- Footer ---------- */
 .nz-footer {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -257,6 +311,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   .nz-hero h1 { font-size: 64px; }
   .nz-hero-tagline { font-size: 19px; }
   .nz-cards { grid-template-columns: repeat(3, 1fr); }
+  .nz-collage { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px; gap: 12px; }
   .nz-map-list { grid-template-columns: repeat(2, 1fr); }
   .nz-sec-title { font-size: 22px; }
 }
