@@ -8,8 +8,13 @@
    URLs) are NEVER hardcoded here; only the hub-level wording is.
    No log API, no Supabase, no backend dependency in Phase B.
    The bot NEVER calls payment/wallet APIs and NEVER books a table.
-   Tier 2 (Pi AI) is DEFERRED: the AI tab shows an UNAVAILABLE notice;
-   NO pinet.com iframe is embedded anywhere in this file. */
+   Tier 2 (Pi AI) ENABLED 2026-11-25: the AI tab lazy-loads an iframe of
+   the Pi Studio app (nightzoneservice7883.pinet.com) — ONLY inside Pi
+   Browser. Outside Pi Browser the AI tab shows a friendly notice instead.
+   The iframe is created on first AI-tab click and removed when switching
+   back to the Internal tab (Lumia pattern). Pi AI verified live by Nguyễn
+   in Pi Browser 2026-11-25 01:51–01:54 (correct facts, correct routing,
+   no invented prices, graceful joke handling). */
 (function () {
   "use strict";
 
@@ -19,6 +24,13 @@
     garden303: "https://gardenstation303-mainnet.vercel.app",
     lumia909: "https://lumia909.vercel.app"
   };
+
+  /* ---------- Tier 2 (Pi AI) ---------- */
+  var PI_AI_URL = "https://nightzoneservice7883.pinet.com"; // Pi Studio "NightZone Services"
+  var isPiBrowser =
+    typeof navigator !== "undefined" &&
+    navigator.userAgent.indexOf("PiBrowser") !== -1;
+  var aiFrame = null; // lazily created iframe (null until first AI-tab click)
 
   var members = null;      // fetched members.json (all members, as in the hub)
   var venues = null;       // the 2 in-scope venues, in members.json order
@@ -290,6 +302,35 @@
     });
   }
 
+  /* ---------- Tier 2 (Pi AI) iframe — lazy-create, remove on tab switch ---------- */
+  function ensureAiFrame() {
+    if (!isPiBrowser) return null;
+    if (aiFrame) return aiFrame;
+    var holder = document.getElementById("nz-chat-ai-frame");
+    var notice = document.getElementById("nz-chat-ai-notice");
+    if (!holder) return null;
+    if (notice) notice.style.display = "none";
+    holder.style.display = "";
+    var f = document.createElement("iframe");
+    f.src = PI_AI_URL;
+    f.title = "NightZone — Trợ lý AI";
+    f.setAttribute("allow", "clipboard-write");
+    holder.appendChild(f);
+    aiFrame = f;
+    return f;
+  }
+  function removeAiFrame() {
+    if (aiFrame && aiFrame.parentNode) aiFrame.parentNode.removeChild(aiFrame);
+    aiFrame = null;
+    var holder = document.getElementById("nz-chat-ai-frame");
+    if (holder) holder.style.display = "none";
+  }
+  function showAiNotice() {
+    removeAiFrame();
+    var notice = document.getElementById("nz-chat-ai-notice");
+    if (notice) notice.style.display = "";
+  }
+
   function switchTab(which) {
     var tabIn = document.getElementById("nz-tab-internal");
     var tabAi = document.getElementById("nz-tab-ai");
@@ -301,9 +342,18 @@
       chipsRow.style.display = "none";
       inputRow.style.display = "none";
       aiPanel.style.display = "";
+      if (isPiBrowser) {
+        aiPanel.classList.add("has-frame");
+        ensureAiFrame();
+      } else {
+        aiPanel.classList.remove("has-frame");
+        showAiNotice();
+      }
     } else {
       tabIn.classList.add("active");
       tabAi.classList.remove("active");
+      removeAiFrame();
+      aiPanel.classList.remove("has-frame");
       aiPanel.style.display = "none";
       chatBody.style.display = "";
       chipsRow.style.display = "";
@@ -329,10 +379,13 @@
           '</div>' +
           '<div class="nz-chat-body" id="nz-chat-body"></div>' +
           '<div class="nz-chat-ai" id="nz-chat-ai" style="display:none;">' +
-            '<p><b>Trợ lý AI chưa khả dụng.</b></p>' +
-            '<p>Trợ lý AI NightZone đang được chuẩn bị và sẽ cần mở bằng Pi Browser với tài khoản Pi. Hiện tại bạn dùng tab <b>Nội bộ</b> để được hỗ trợ nhé.</p>' +
-            '<p class="nz-chat-ai-en">The NightZone AI assistant is not available yet. It will require Pi Browser with a Pi account. Please use the <b>Internal</b> tab for now.</p>' +
-            '<button type="button" class="nz-chat-ai-back" id="nz-chat-ai-back">← Quay lại tab Nội bộ</button>' +
+            '<div class="nz-chat-ai-frame" id="nz-chat-ai-frame" style="display:none;"></div>' +
+            '<div id="nz-chat-ai-notice">' +
+              '<p><b>Trợ lý AI chỉ mở được trong Pi Browser.</b></p>' +
+              '<p>Trợ lý AI NightZone cần mở bằng Pi Browser với tài khoản Pi. Bạn đang dùng trình duyệt thường nên không mở được AI ở đây. Hãy mở NightZone bằng Pi Browser rồi bấm tab <b>AI</b> nhé. Hiện tại bạn dùng tab <b>Nội bộ</b> để được hỗ trợ.</p>' +
+              '<p class="nz-chat-ai-en">The NightZone AI assistant requires Pi Browser with a Pi account. Please open NightZone in Pi Browser and tap the <b>AI</b> tab. Use the <b>Internal</b> tab for now.</p>' +
+              '<button type="button" class="nz-chat-ai-back" id="nz-chat-ai-back">← Quay lại tab Nội bộ</button>' +
+            '</div>' +
           '</div>' +
           '<div class="nz-chat-chips" id="nz-chat-chips">' +
             '<button type="button" data-q="Tìm Beer Garden">Tìm Beer Garden</button>' +
