@@ -1,0 +1,44 @@
+/* Mảnh ghép — tile-assembly photo reveal (Nguyễn, 2026-11-26).
+   Shared effect spec, identical across the 5 ecosystem sites.
+   Applies to: "Khoảnh khắc" collage images + member-card photos.
+   Videos are never touched. No-JS / no-IntersectionObserver: images
+   render normally (hidden state is applied by JS only, at play time). */
+
+.nz-card-media { position: relative; }
+
+/* Tile layer: absolutely covers the photo's box, sits above the img
+   but below the collage app-name chip (chip comes later in the DOM). */
+.mg-tiles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.mg-tile {
+  position: absolute;
+  background-repeat: no-repeat;
+  opacity: 0;
+  /* Start state is set inline per tile (random small offset + scale).
+     Transition: ease-out cubic, ~0.32s; stagger via inline delay. */
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+.mg-tiles.mg-play .mg-tile {
+  transform: translate(0, 0) scale(1) !important;
+  opacity: 1;
+}
+
+/* Img is hidden only while its tiles are assembling (JS adds this class
+   right before building the tiles). After the animation the tiles are
+   removed and the img fades back in. */
+.mg-hidden { opacity: 0 !important; }
+.mg-fade-in { transition: opacity 0.25s ease; }
+
+/* Reduced motion: never hide the img, never animate tiles. */
+@media (prefers-reduced-motion: reduce) {
+  .mg-tiles { display: none; }
+  .mg-hidden { opacity: 1 !important; }
+}
